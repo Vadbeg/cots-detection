@@ -23,8 +23,8 @@ def transform_dataset_to_yolo_cli(
 ) -> None:
     dataframe = pd.read_csv(annotations_path)
 
-    new_images_root.mkdir(exist_ok=True)
-    labels_root.mkdir(exist_ok=True)
+    new_images_root.mkdir(parents=True, exist_ok=True)
+    labels_root.mkdir(parents=True, exist_ok=True)
 
     dataset_to_yolo_transformer = DatasetToYoloTransformer(
         annotation_dataframe=dataframe,
