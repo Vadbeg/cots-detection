@@ -1,0 +1,2 @@
+root_images_path: /Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/train_images
+train_dataframe_path: /Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/train.csv
