@@ -1,0 +1,8 @@
+train: /home/vadbeg/Data_SSD/Kaggle/yolo_train/images/train
+val: /home/vadbeg/Data_SSD/Kaggle/yolo_train/images/val
+
+# number of classes
+nc: 1
+
+# class names
+names: ['cot']
