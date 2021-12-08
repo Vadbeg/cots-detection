@@ -130,3 +130,7 @@ dmypy.json
 
 .idea/
 weights/
+
+.DS_Store
+
+*.json

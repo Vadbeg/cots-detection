@@ -1,41 +1,14 @@
 """CLI for evaluation result on whole folder of images"""
 
+import random
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List
 
 import numpy as np
-import torch
 from cv2 import cv2
 from tqdm import tqdm
 
-from cots_detection.modules.evaluation.yolo_execution import YoloExecutor
-
-
-def load_jit_model(model_path: Union[str, Path]) -> torch.jit.TracedModule:
-    model = torch.jit.load(f=model_path, map_location=torch.device('cpu'))
-
-    return model
-
-
-def load_yolo_executor(model_path: Union[str, Path]) -> YoloExecutor:
-    model = load_jit_model(model_path=model_path)
-    yolo_executor = YoloExecutor(model=model)
-
-    return yolo_executor
-
-
-def resize_bboxes(bboxes: List[List[float]], old_size: Tuple, new_size: Tuple) -> List:
-    resized_bboxes_and_conf = []
-
-    for curr_bbox_and_conf in bboxes:
-        curr_bbox_and_conf[0] = (curr_bbox_and_conf[0] / old_size[0]) * new_size[0]
-        curr_bbox_and_conf[1] = (curr_bbox_and_conf[1] / old_size[1]) * new_size[1]
-        curr_bbox_and_conf[2] = (curr_bbox_and_conf[2] / old_size[0]) * new_size[0]
-        curr_bbox_and_conf[3] = (curr_bbox_and_conf[3] / old_size[1]) * new_size[1]
-
-        resized_bboxes_and_conf.append(curr_bbox_and_conf)
-
-    return resized_bboxes_and_conf
+from cots_detection.utils import load_image, load_yolo_executor, resize_bboxes
 
 
 def draw_bboxes(
@@ -68,27 +41,33 @@ def draw_bboxes(
     return image
 
 
-def load_image(image_path: Union[str, Path]) -> np.ndarray:
-    image = cv2.imread(filename=str(image_path))
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    return image
-
-
 if __name__ == '__main__':
-    model_path = 'best.torchscript.pt'
+    model_path = 'weights/best_1280.torchscript.pt'
     yolo_executor = load_yolo_executor(model_path=model_path)
 
     image_path = '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/yolo_train/images/train/1_4517.jpg'
 
     images_folder_path = Path(
-        '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/yolo_train/images/train'
+        '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/yolo_train/images/val'
     )
 
-    for curr_image_path in tqdm(list(images_folder_path.glob(pattern='*.jpg'))):
-        image = load_image(image_path=image_path)
-        bboxes = yolo_executor.execute(image)
+    images_paths = list(images_folder_path.glob(pattern='*.jpg'))
+    random.shuffle(images_paths)
 
-        if len(bboxes) > 0:
-            print(bboxes)
-            # image = draw_bboxes(image)
+    for curr_image_path in tqdm(images_paths):
+        image = load_image(image_path=curr_image_path)
+        bboxes = yolo_executor.execute(image)
+        bboxes_to_draw = resize_bboxes(
+            bboxes=bboxes,
+            old_size=(1280, 1280),
+            new_size=(image.shape[1], image.shape[0]),
+        )
+
+        image = draw_bboxes(image=image, bboxes_and_conf=bboxes, random_color=False)
+        cv2.imshow('Image', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+        key = cv2.waitKey(0)
+        if key == ord('q'):
+            break
+
+    cv2.destroyAllWindows()
