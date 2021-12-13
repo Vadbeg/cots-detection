@@ -112,7 +112,8 @@ class DatasetToCocoTransformer:
                 'bbox': transformed_coords,
                 'category_id': 1,
                 'image_id': image_id,
-                'iscorwd': 0,
+                'iscrowd': False,
+                'area': transformed_coords[2] * transformed_coords[3],
                 'id': last_segmentation_id,
             }
             image_annotations.append(curr_image_annotation)
