@@ -42,7 +42,7 @@ def draw_bboxes(
 
 
 if __name__ == '__main__':
-    model_path = 'weights/best_1280.torchscript.pt'
+    model_path = 'weights/best_long_train.pt'
     yolo_executor = load_yolo_executor(model_path=model_path)
 
     image_path = '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/yolo_train/images/train/1_4517.jpg'
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         bboxes = yolo_executor.execute(image)
         bboxes_to_draw = resize_bboxes(
             bboxes=bboxes,
-            old_size=(1280, 1280),
+            old_size=(640, 640),
             new_size=(image.shape[1], image.shape[0]),
         )
 

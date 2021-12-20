@@ -107,13 +107,11 @@ def reformat_predictions(preds: List[List[float]]) -> List[List[float]]:
 
 
 if __name__ == '__main__':
-    model_path = 'weights/best_1280.torchscript.pt'
+    model_path = 'weights/best_long_train.torchscript.pt'
     yolo_executor = load_yolo_executor(model_path=model_path)
 
-    image_path = '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/yolo_train/images/train/1_4517.jpg'
-
     images_folder_path = Path(
-        '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/yolo_train/images/val'
+        '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/yolo_train/images/train'
     )
 
     DATAFRAME_PATH = '/Users/vadim.tsitko/Data/tensorflow-great-barrier-reef/train.csv'
@@ -144,6 +142,9 @@ if __name__ == '__main__':
         )
 
         bboxes_pred = reformat_predictions(preds=bboxes_to_draw)
+
+        print('pred ', bboxes_pred)
+        print('true ', bboxes_true)
 
         f2_score = imagewise_f2_score(
             gt_bboxes=np.array(bboxes_true), pred_bboxes=np.array(bboxes_pred)

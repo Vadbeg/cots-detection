@@ -29,7 +29,7 @@ def load_jit_model(model_path: Union[str, Path]) -> torch.jit.TracedModule:
 
 def load_yolo_executor(model_path: Union[str, Path]) -> YoloExecutor:
     model = load_jit_model(model_path=model_path)
-    yolo_executor = YoloExecutor(model=model, image_size=(1280, 1280))
+    yolo_executor = YoloExecutor(model=model, image_size=(640, 640))
 
     return yolo_executor
 
