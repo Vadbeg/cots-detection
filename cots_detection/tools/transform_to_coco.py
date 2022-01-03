@@ -33,7 +33,7 @@ class DatasetToCocoTransformer:
 
         images_info = []
         annotations_info = []
-        categories_info = [{'supercategory': 'cot', 'id': 1, 'name': 'cot'}]
+        categories_info = [{'supercategory': 'cot', 'id': 0, 'name': 'cot'}]
         last_segmentation_id = -1
 
         for index, curr_row in tqdm(
@@ -65,6 +65,8 @@ class DatasetToCocoTransformer:
 
                 images_info.append(image_info)
                 annotations_info.extend(image_annotations_info)
+
+        print(last_segmentation_id)
 
         result = {
             'images': images_info,
@@ -110,7 +112,7 @@ class DatasetToCocoTransformer:
             last_segmentation_id += 1
             curr_image_annotation = {
                 'bbox': transformed_coords,
-                'category_id': 1,
+                'category_id': 0,
                 'image_id': image_id,
                 'iscrowd': False,
                 'area': transformed_coords[2] * transformed_coords[3],
@@ -134,10 +136,17 @@ class DatasetToCocoTransformer:
         ] = self._annotation_dataframe[self.VIDEO_FRAME_COLUMN].apply(int)
 
     @staticmethod
-    def _transform_bbox(bbox: Dict[str, int]) -> List[float]:
+    def _transform_bbox(
+        bbox: Dict[str, int], original_image_size: Tuple[int, int] = (1280, 720)
+    ) -> List[float]:
         x_min = int(bbox['x'])
         y_min = int(bbox['y'])
         width = int(bbox['width'])
         height = int(bbox['height'])
+
+        if x_min + width > original_image_size[0]:
+            width = original_image_size[0] - x_min
+        if y_min + height > original_image_size[1]:
+            height = original_image_size[1] - y_min
 
         return [x_min, y_min, width, height]

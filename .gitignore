@@ -134,3 +134,4 @@ weights/
 .DS_Store
 
 *.json
+yolox/

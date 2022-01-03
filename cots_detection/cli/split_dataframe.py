@@ -7,11 +7,13 @@ from typing import List, Tuple
 
 import pandas as pd
 import typer
+from sklearn.model_selection import GroupKFold
 
 
 class SplitType(Enum):
     video: str = 'video'
     length: str = 'length'
+    k_fold: str = 'k_fold'
 
 
 def _split_dataframe_by_videos(
@@ -19,6 +21,24 @@ def _split_dataframe_by_videos(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     train_dataframe = dataframe.loc[dataframe['video_id'].isin(train_video_ids)]
     val_dataframe = dataframe.loc[dataframe['video_id'].isin(val_video_ids)]
+
+    return train_dataframe, val_dataframe
+
+
+def _split_dataframe_by_fold(
+    dataframe: pd.DataFrame,
+    n_fold: int = 5,
+    fold_id: int = 4,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    k_fold = GroupKFold(n_splits=n_fold)
+    train_ids, val_ids = list(
+        k_fold.split(
+            dataframe, y=dataframe.video_id.tolist(), groups=dataframe.sequence
+        )
+    )[fold_id]
+
+    train_dataframe = dataframe.loc[train_ids]
+    val_dataframe = dataframe.loc[val_ids]
 
     return train_dataframe, val_dataframe
 
@@ -72,7 +92,11 @@ def split_dataframe_cli(
         )
     elif split_type == SplitType.length:
         train_dataframe, val_dataframe = _split_dataframe_by_length(
-            dataframe=dataframe, val_length=0.3
+            dataframe=dataframe, val_length=0.2
+        )
+    elif split_type == SplitType.k_fold:
+        train_dataframe, val_dataframe = _split_dataframe_by_fold(
+            dataframe=dataframe, n_fold=10, fold_id=9
         )
     else:
         raise ValueError('No such dataset type')
